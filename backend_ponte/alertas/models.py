@@ -1,6 +1,10 @@
 from django.db import models
 
 class Estudante(models.Model):
+    """
+    Modelo que representa um Estudante cadastrado no sistema.
+    Armazena os dados primários para identificação em caso de emergência.
+    """
     # Tabela simples para cadastrar quem está usando o app
     nome = models.CharField(max_length=100)
     matricula = models.CharField(max_length=50, unique=True) # Para integração com a escola/DPCA
@@ -10,6 +14,10 @@ class Estudante(models.Model):
         return self.nome
 
 class AlertaSOS(models.Model):
+    """
+    Modelo que registra cada acionamento do Botão de Pânico (Alerta SOS).
+    Possui relacionamento com o Estudante e armazena a localização e o timestamp exato.
+    """
     # Tabela que vai registrar cada vez que o botão de pânico for apertado
     estudante = models.ForeignKey(Estudante, on_delete=models.CASCADE)
     localizacao = models.CharField(max_length=255) # Ex: "Ponte Princesa Isabel" ou coordenadas GPS

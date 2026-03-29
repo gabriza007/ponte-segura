@@ -5,6 +5,11 @@ from .models import Estudante, AlertaSOS
 
 @csrf_exempt
 def criar_alerta(request):
+    """
+    Endpoint (API REST) responsável por receber requisições POST com JSON
+    e registrar um novo AlertaSOS no banco de dados.
+    Aplica o Princípio da Responsabilidade Única (SRP).
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
