@@ -18,7 +18,173 @@
 <body>
     <div id="root"></div>
 
-    <!-- Nosso código do App -->
-    <script type="text/babel" src="app.jsx"></script>
+    <!-- Nosso código do App inserido diretamente para evitar erro de servidor local (CORS/Babel) -->
+    <script type="text/babel">
+const { useState, useEffect } = React;
+
+function App() {
+    // idle -> confirm -> sending -> success
+    const [status, setStatus] = useState('idle');
+    const [estudanteId, setEstudanteId] = useState(null);
+    const [loadingLogin, setLoadingLogin] = useState(false);
+
+    const fazerLogin = () => {
+        const nome = document.getElementById('iptNome')?.value;
+        const matricula = document.getElementById('iptMatricula')?.value;
+        const telefone = document.getElementById('iptTelefone')?.value;
+
+        if (!matricula) {
+            alert('Por favor, informe a Matrícula para entrar!');
+            return;
+        }
+
+        setLoadingLogin(true);
+        fetch('http://127.0.0.1:8000/api/login/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ nome, matricula, telefone })
+        })
+        .then(response => response.json())
+        .then(data => {
+            setLoadingLogin(false);
+            if (data.sucesso) {
+                console.log("Estudante Autenticado!", data);
+                setEstudanteId(data.estudante_id);
+            } else {
+                alert("Erro: " + data.erro);
+            }
+        })
+        .catch(error => {
+            setLoadingLogin(false);
+            alert("Falha terrível: o servidor está off?");
+            console.error(error);
+        });
+    };
+
+    const handleInitialClick = () => {
+        setStatus('confirm'); // Primeiro toque
+    };
+
+    const handleConfirmClick = () => {
+        setStatus('sending'); // Confirmação (Segundo toque)
+
+        console.log("Iniciando envio real do Alerta para o Banco de Dados (Django)...");
+        fetch('http://127.0.0.1:8000/api/alerta/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Juntando a localização com a identificação do aluno capturada no login
+            body: JSON.stringify({ 
+                localizacao: 'Ponte Princesa Isabel (Detectado via Celular)',
+                estudante_id: estudanteId 
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    console.log("SUCESSO: Alerta salvo no banco PostgreSQL!", data);
+                    setStatus('success');
+                } else {
+                    console.error("Erro retornado pelo servidor:", data.erro);
+                    alert("Falha: " + data.erro);
+                    setStatus('idle');
+                }
+            })
+            .catch(error => {
+                console.error("Erro de rede:", error);
+                alert("Erro de conexão! O servidor (python manage.py runserver) está rodando?");
+                setStatus('idle');
+            });
+    };
+
+    const handleCancel = () => {
+        setStatus('idle');
+    };
+
+    if (!estudanteId) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div className="header">
+                    <h1>🛡️ PONTE SEGURA</h1>
+                </div>
+                <div className="content" style={{textAlign: 'left'}}>
+                    <h2 style={{marginBottom: '15px', color: 'white', textAlign: 'center'}}>Identificação</h2>
+                    <p style={{marginBottom: '30px', color: '#cbd5e1', fontSize: '15px', textAlign: 'center'}}>Preencha seus dados para conectar.</p>
+                    
+                    <label style={{color: '#94a3b8', fontSize: '12px', marginBottom: '5px', display: 'block'}}>Seu Nome</label>
+                    <input type="text" id="iptNome" placeholder="Ex: João Silva" style={{width: '100%', padding: '15px', marginBottom: '15px', borderRadius: '10px', border: 'none', fontSize: '16px', background: '#334155', color: '#fff'}} />
+                    
+                    <label style={{color: '#94a3b8', fontSize: '12px', marginBottom: '5px', display: 'block'}}>Nº Matrícula (Obrigatório)</label>
+                    <input type="text" id="iptMatricula" placeholder="Ex: 2026101" style={{width: '100%', padding: '15px', marginBottom: '15px', borderRadius: '10px', border: 'none', fontSize: '16px', background: '#334155', color: '#fff'}} />
+                    
+                    <label style={{color: '#94a3b8', fontSize: '12px', marginBottom: '5px', display: 'block'}}>Telefone / Contato</label>
+                    <input type="text" id="iptTelefone" placeholder="(XX) XXXXX-XXXX" style={{width: '100%', padding: '15px', marginBottom: '25px', borderRadius: '10px', border: 'none', fontSize: '16px', background: '#334155', color: '#fff'}} />
+                    
+                    <button onClick={fazerLogin} disabled={loadingLogin} style={{width: '100%', padding: '15px', borderRadius: '25px', border: 'none', background: '#3b82f6', color: 'white', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s'}}>
+                        {loadingLogin ? 'Verificando...' : 'Entrar na Segurança'}
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    if (status === 'success') {
+        return (
+            <div className="success-screen">
+                <h2>Ocorrência Registrada</h2>
+                <p>A Guarda Municipal já foi acionada e tem a sua localização exata.</p>
+                <button className="btn-secondary" onClick={handleCancel}>
+                    Retornar ao Início
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div className="header">
+                <h1>🛡️ PONTE SEGURA</h1>
+            </div>
+            <div className="content">
+                <p style={{ marginBottom: '40px', color: '#cbd5e1', fontSize: '18px', padding: '0 20px' }}>
+                    {status === 'idle' ? 'Em caso de emergência, pressione o botão abaixo para pedir ajuda.' : 'ATENÇÃO: Deseja realmente enviar a sua localização para a patrulha?'}
+                </p>
+
+                <button
+                    className={`panic-button ${status}`}
+                    onClick={status === 'idle' ? handleInitialClick : handleConfirmClick}
+                    disabled={status === 'sending'}
+                >
+                    {status === 'idle' && (
+                        <React.Fragment>
+                            <span style={{ fontSize: '45px' }}>🚨</span>
+                            <span>PEDIR AJUDA</span>
+                        </React.Fragment>
+                    )}
+                    {status === 'confirm' && (
+                        <React.Fragment>
+                            <span style={{ fontSize: '30px' }}>⚠️</span>
+                            <span>CONFIRMAR AGORA</span>
+                        </React.Fragment>
+                    )}
+                    {status === 'sending' && (
+                        <span>Enviando...</span>
+                    )}
+                </button>
+
+                {status === 'confirm' && (
+                    <button className="cancel-btn" onClick={handleCancel}>
+                        Cancelar Solicitação
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+    </script>
 </body>
 </html>
