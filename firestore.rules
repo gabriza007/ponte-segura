@@ -1,0 +1,95 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Globals
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    // Removido o check de email_verified para suportar a autenticação com emails mapeados matricula/credencial
+    function isSignedIn() { return request.auth != null; }
+
+    function isEstudante() {
+      return isSignedIn() && exists(/databases/$(database)/documents/estudantes/$(request.auth.uid));
+    }
+    
+    function isGuarda() {
+      return isSignedIn() && (exists(/databases/$(database)/documents/policiais/$(request.auth.uid)) || (request.auth.token.email != null && request.auth.token.email.matches('.*@policia\\.com')));
+    }
+
+    function isValidAlerta(data) {
+      return data.keys().hasAll(['estudante_id', 'estudante', 'localizacao', 'data_hora', 'resolvido']) &&
+             data.estudante_id is string &&
+             data.estudante is map &&
+             data.estudante.keys().hasAll(['nome', 'matricula', 'telefone']) &&
+             data.estudante.keys().size() == 3 &&
+             data.estudante.nome is string && data.estudante.nome.size() > 0 && data.estudante.nome.size() <= 100 &&
+             data.estudante.matricula is string && data.estudante.matricula.size() > 0 && data.estudante.matricula.size() <= 60 &&
+             data.estudante.telefone is string && data.estudante.telefone.size() > 0 && data.estudante.telefone.size() <= 20 &&
+             data.localizacao is string && data.localizacao.size() > 0 && data.localizacao.size() <= 200 &&
+             data.data_hora is number &&
+             data.resolvido is bool &&
+             (!('ultima_atualizacao' in data) || data.ultima_atualizacao is number) &&
+             (!('coordenadas' in data) || data.coordenadas == null || (data.coordenadas is map && data.coordenadas.keys().hasAll(['lat', 'lng']) && data.coordenadas.lat is number && data.coordenadas.lng is number)) &&
+             (!('status' in data) || (data.status is string && data.status.size() <= 20));
+    }
+
+    function isValidMensagem(data) {
+       return data.keys().hasAll(['texto', 'remetenteId', 'remetenteRole', 'data_hora']) &&
+              data.keys().size() == 4 &&
+              data.texto is string && data.texto.size() > 0 && data.texto.size() <= 1000 &&
+              data.remetenteId is string && data.remetenteId.size() <= 128 &&
+              data.remetenteRole in ['estudante', 'guarda'] &&
+              data.data_hora is number;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /estudantes/{uid} {
+      allow create: if isSignedIn() && request.auth.uid == uid &&
+                    incoming().keys().hasAll(['nome', 'matricula', 'telefone', 'email']) &&
+                    incoming().nome is string && incoming().nome.size() > 0 && incoming().nome.size() <= 100 &&
+                    incoming().matricula is string && incoming().matricula.size() > 0 && incoming().matricula.size() <= 60 &&
+                    incoming().telefone is string && incoming().telefone.size() > 0 && incoming().telefone.size() <= 20 &&
+                    incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
+                    (!('instituicao' in incoming()) || (incoming().instituicao is string && incoming().instituicao.size() <= 150)) &&
+                    (!('foto_url' in incoming()) || (incoming().foto_url is string && incoming().foto_url.size() <= 500));
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && request.auth.uid == uid && incoming().diff(existing()).affectedKeys().hasOnly(['instituicao', 'foto_url']) &&
+                    (!('instituicao' in incoming()) || (incoming().instituicao is string && incoming().instituicao.size() <= 150)) &&
+                    (!('foto_url' in incoming()) || (incoming().foto_url is string && incoming().foto_url.size() <= 500));
+    }
+
+    match /policiais/{uid} {
+      allow create: if isSignedIn() && request.auth.uid == uid &&
+                    incoming().keys().hasAll(['credencial']) &&
+                    incoming().keys().size() == 1 &&
+                    incoming().credencial is string && incoming().credencial.size() > 0 && incoming().credencial.size() <= 60;
+      allow read: if isSignedIn();
+    }
+
+    match /alertasos/{alertaId} {
+      allow create: if isValidId(alertaId) && isEstudante() &&
+                    isValidAlerta(incoming()) && incoming().resolvido == false &&
+                    incoming().estudante_id == request.auth.uid;
+
+      allow read: if isGuarda() || (isSignedIn() && existing().estudante_id == request.auth.uid);
+      
+      allow update: if isValidAlerta(incoming()) && (
+        (isGuarda() && incoming().diff(existing()).affectedKeys().hasAny(['resolvido', 'status']) && incoming().diff(existing()).affectedKeys().hasOnly(['resolvido', 'status', 'ultima_atualizacao'])) ||
+        (isEstudante() && existing().estudante_id == request.auth.uid && existing().resolvido == false && incoming().diff(existing()).affectedKeys().hasAny(['localizacao', 'coordenadas']) && incoming().diff(existing()).affectedKeys().hasOnly(['localizacao', 'coordenadas', 'ultima_atualizacao']))
+      );
+
+      match /mensagens/{mensagemId} {
+        allow read: if isGuarda() || (isSignedIn() && get(/databases/$(database)/documents/alertasos/$(alertaId)).data.estudante_id == request.auth.uid);
+        allow create: if isValidId(mensagemId) && isValidMensagem(incoming()) &&
+          incoming().remetenteId == request.auth.uid &&
+          ((isGuarda() && incoming().remetenteRole == 'guarda') || 
+          (isEstudante() && incoming().remetenteRole == 'estudante' && get(/databases/$(database)/documents/alertasos/$(alertaId)).data.estudante_id == request.auth.uid));
+        allow update, delete: if false;
+      }
+    }
+  }
+}
