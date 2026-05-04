@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Shield, Mail, LogIn, User } from 'lucide-react';
-import { doc, getDocFromServer } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import Logo from '../../components/Logo';
@@ -19,12 +19,12 @@ export default function StudentLogin() {
     try {
       const res = await signInWithEmailAndPassword(auth, credentials.email, credentials.senha);
       
-      if (!res.user.emailVerified) {
-        await signOut(auth);
-        throw new Error('UNVERIFIED_EMAIL');
-      }
+//      if (!res.user.emailVerified) {
+//        await signOut(auth);
+//        throw new Error('UNVERIFIED_EMAIL');
+//      }
 
-      const userDoc = await getDocFromServer(doc(db, 'estudantes', res.user.uid));
+      const userDoc = await getDoc(doc(db, 'estudantes', res.user.uid));
       if (!userDoc.exists()) throw new Error('ESTUDANTE_NAO_ENCONTRADO');
       
       const studentData = userDoc.data();

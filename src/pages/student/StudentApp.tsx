@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, AlertTriangle, CheckCircle2, Navigation2, LogOut, User, Camera, Building, Home, Menu, X, MessageSquare } from 'lucide-react';
-import { collection, addDoc, doc, updateDoc, getDocFromServer, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../../firebase';
 import { signOut } from 'firebase/auth';
 import { getAddressFromCoords } from '../../utils/geocoding';
@@ -464,9 +464,9 @@ export default function StudentAppWrapper() {
       setStudentData(locState.student);
     } else {
       const waitAuth = auth.onAuthStateChanged(async (user) => {
-        if (user && user.emailVerified) {
+        if (user) {
           try {
-            const userDoc = await getDocFromServer(doc(db, 'estudantes', user.uid));
+            const userDoc = await getDoc(doc(db, 'estudantes', user.uid));
             if (userDoc.exists()) {
               setStudentData({ ...userDoc.data(), id: user.uid });
             } else {

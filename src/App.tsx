@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { doc, getDocFromServer } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 import StudentLogin from './pages/student/StudentLogin';
@@ -23,11 +23,9 @@ export default function App() {
   useEffect(() => {
     async function testConnection() {
       try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
+        await getDoc(doc(db, 'test', 'connection'));
       } catch (error) {
-        if(error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration.");
-        }
+        console.warn("Connection test failed (this may be expected if the 'test' collection has no rules/documents):", error);
       }
     }
     testConnection();
