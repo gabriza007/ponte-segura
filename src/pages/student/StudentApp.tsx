@@ -198,7 +198,7 @@ function StudentApp({ studentData }: { studentData: any }) {
   if (!studentData) return null;
 
   return (
-    <div className="mobile-container fade-in pb-8">
+    <div className="mobile-container fade-in pb-28">
       {/* Modal de Confirmação de Saída */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 fade-in px-4">
@@ -436,7 +436,32 @@ function StudentApp({ studentData }: { studentData: any }) {
         </div>
       )}
 
-      {/* Bottom Navigation Navigation Removed */}
+      {/* Persistent Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/90 backdrop-blur-md border-t border-white/10 px-6 py-3 pb-8">
+        <div className="flex items-center justify-around max-w-lg mx-auto">
+          <button 
+            onClick={() => setActiveTab('home')}
+            className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'home' ? 'text-primary' : 'text-slate-400 hover:text-white'}`}
+          >
+            <div className="relative">
+              <AlertTriangle size={24} className={activeTab === 'home' ? 'animate-pulse' : ''} />
+              {activeTab !== 'home' && unreadMessages > 0 && step === 3 && (
+                <span className="absolute -top-1 -right-1 bg-danger w-3 h-3 rounded-full border border-slate-900"></span>
+              )}
+            </div>
+            <span className="text-[10px] uppercase font-bold tracking-wider">Alertas</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('profile')}
+            className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'profile' ? 'text-primary' : 'text-slate-400 hover:text-white'}`}
+          >
+            <User size={24} />
+            <span className="text-[10px] uppercase font-bold tracking-wider">Perfil</span>
+          </button>
+        </div>
+      </div>
+
       {/* Chat Side Panel / Modal */}
       {isChatOpen && alertaId && (
         <div className="fixed inset-0 z-[70] bg-black/80 flex flex-col backdrop-blur-md">
