@@ -40,7 +40,7 @@ export default function PoliceRadar() {
   const [loadingRadar, setLoadingRadar] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [filterView, setFilterView] = useState<'todos' | 'ativos' | 'operacao' | 'resolvido'>('todos');
+  const [filterView, setFilterView] = useState<'todos' | 'ativos' | 'operacao' | 'rastreamento' | 'resolvido'>('todos');
   const [dateFilter, setDateFilter] = useState('');
   const [chatAlertaId, setChatAlertaId] = useState<string | null>(null);
   const [selectedAlertaId, setSelectedAlertaId] = useState<string | null>(null);
@@ -129,6 +129,17 @@ export default function PoliceRadar() {
     }
   };
 
+  const handleRastreamento = async (id: string) => {
+    try {
+      await updateDoc(doc(db, 'alertasos', id), { 
+        status: 'rastreamento',
+        ultima_atualizacao: Date.now()
+      });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `alertasos/${id}`);
+    }
+  };
+
   const handleFinalizar = async (id: string) => {
     try {
       await updateDoc(doc(db, 'alertasos', id), { 
@@ -156,9 +167,11 @@ export default function PoliceRadar() {
 
   const filteredAlertas = alertas.filter(alerta => {
     const isOperacao = alerta.status === 'operacao';
+    const isRastreamento = alerta.status === 'rastreamento';
 
-    if (filterView === 'ativos' && (alerta.resolvido || isOperacao)) return false;
+    if (filterView === 'ativos' && (alerta.resolvido || isOperacao || isRastreamento)) return false;
     if (filterView === 'operacao' && (!isOperacao || alerta.resolvido)) return false;
+    if (filterView === 'rastreamento' && (!isRastreamento || alerta.resolvido)) return false;
     if (filterView === 'resolvido' && !alerta.resolvido) return false;
     
     if (dateFilter) {
@@ -233,6 +246,7 @@ export default function PoliceRadar() {
             <option value="todos">Todos os Alertas</option>
             <option value="ativos">SOS Ativo</option>
             <option value="operacao">Em Operação</option>
+            <option value="rastreamento">Em Rastreamento</option>
             <option value="resolvido">Resolvido (Histórico)</option>
           </select>
         </div>
@@ -275,7 +289,7 @@ export default function PoliceRadar() {
             <Marker 
               key={alerta.id} 
               position={[alerta.coordenadas.lat, alerta.coordenadas.lng]}
-              icon={alerta.resolvido ? defaultIcon : (alerta.status === 'operacao' ? warningIcon : emergencyIcon)}
+              icon={alerta.resolvido ? defaultIcon : ((alerta.status === 'operacao' || alerta.status === 'rastreamento') ? warningIcon : emergencyIcon)}
             >
               <Popup>
                 <div className="text-black">
@@ -315,9 +329,9 @@ export default function PoliceRadar() {
                 onClick={() => setSelectedAlertaId(alerta.id)}
               >
                 <td>
-                  <span className={`badge ${alerta.resolvido ? 'resolved' : (alerta.status === 'operacao' ? 'warning' : 'active')}`}>
+                  <span className={`badge ${alerta.resolvido ? 'resolved' : ((alerta.status === 'operacao' || alerta.status === 'rastreamento') ? 'warning' : 'active')}`}>
                     {alerta.resolvido ? <CheckCircle2 size={12}/> : <AlertTriangle size={12}/>}
-                    {alerta.resolvido ? 'Resolvido' : (alerta.status === 'operacao' ? 'Em Operação' : 'SOS Ativo')}
+                    {alerta.resolvido ? 'Resolvido' : (alerta.status === 'operacao' ? 'Em Operação' : (alerta.status === 'rastreamento' ? 'Em Rastreamento' : 'SOS Ativo'))}
                   </span>
                 </td>
                 <td>
@@ -340,14 +354,19 @@ export default function PoliceRadar() {
                 <td>
                   <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
                     {!alerta.resolvido ? (
-                      alerta.status === 'operacao' ? (
+                      alerta.status === 'operacao' || alerta.status === 'rastreamento' ? (
                         <button onClick={() => handleFinalizar(alerta.id)} className="action-btn" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', borderColor: 'currentColor' }}>
                           <CheckCircle2 size={16} /> Finalizar
                         </button>
                       ) : (
-                        <button onClick={() => handleOperacao(alerta.id)} className="action-btn">
-                          <Shield size={16} /> Enviar Patrulha
-                        </button>
+                        <div className="flex flex-col gap-2 w-full">
+                          <button onClick={() => handleOperacao(alerta.id)} className="action-btn">
+                            <Shield size={16} /> Enviar Patrulha
+                          </button>
+                          <button onClick={() => handleRastreamento(alerta.id)} className="action-btn" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', borderColor: 'currentColor' }}>
+                            <Navigation2 size={16} /> Rastrear
+                          </button>
+                        </div>
                       )
                     ) : (
                       <span className="text-muted text-sm px-2">Finalizado</span>
@@ -384,9 +403,9 @@ export default function PoliceRadar() {
             onClick={() => setSelectedAlertaId(alerta.id)}
           >
             <div className="card-header">
-               <span className={`badge ${alerta.resolvido ? 'resolved' : (alerta.status === 'operacao' ? 'warning' : 'active')}`}>
+               <span className={`badge ${alerta.resolvido ? 'resolved' : ((alerta.status === 'operacao' || alerta.status === 'rastreamento') ? 'warning' : 'active')}`}>
                   {alerta.resolvido ? <CheckCircle2 size={12}/> : <AlertTriangle size={12}/>}
-                  {alerta.resolvido ? 'Resolvido' : (alerta.status === 'operacao' ? 'Em Operação' : 'SOS Ativo')}
+                  {alerta.resolvido ? 'Resolvido' : (alerta.status === 'operacao' ? 'Em Operação' : (alerta.status === 'rastreamento' ? 'Em Rastreamento' : 'SOS Ativo'))}
                 </span>
                 <div className="flex flex-col items-end">
                   <span className="text-xs text-muted">Início: {new Date(alerta.data_hora).toLocaleTimeString('pt-BR')}</span>
@@ -404,14 +423,19 @@ export default function PoliceRadar() {
             </div>
             {!alerta.resolvido && (
               <div className="mt-4 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
-                {alerta.status === 'operacao' ? (
+                {alerta.status === 'operacao' || alerta.status === 'rastreamento' ? (
                   <button onClick={() => handleFinalizar(alerta.id)} className="glass-button w-full" style={{ padding: '12px', fontSize: '1rem', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', borderColor: 'currentColor' }}>
                      <CheckCircle2 size={18} /> Finalizar
                   </button>
                 ) : (
-                  <button onClick={() => handleOperacao(alerta.id)} className="glass-button w-full" style={{ padding: '12px', fontSize: '1rem' }}>
-                     <Shield size={18} /> Enviar Patrulha
-                  </button>
+                  <div className="flex flex-col gap-2 w-full">
+                    <button onClick={() => handleOperacao(alerta.id)} className="glass-button w-full" style={{ padding: '12px', fontSize: '1rem' }}>
+                       <Shield size={18} /> Enviar Patrulha
+                    </button>
+                    <button onClick={() => handleRastreamento(alerta.id)} className="glass-button w-full" style={{ padding: '12px', fontSize: '1rem', background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', borderColor: 'currentColor' }}>
+                       <Navigation2 size={18} /> Iniciar Rastreamento
+                    </button>
+                  </div>
                 )}
                 
                 <button 
