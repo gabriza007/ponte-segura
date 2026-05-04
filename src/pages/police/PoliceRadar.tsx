@@ -35,6 +35,25 @@ const defaultIcon = L.divIcon({
   popupAnchor: [0, -12]
 });
 
+export interface Alerta {
+  id: string;
+  estudante_id?: string;
+  estudante: {
+    nome: string;
+    matricula: string;
+    telefone: string;
+  };
+  localizacao: string;
+  coordenadas?: {
+    lat: number;
+    lng: number;
+  };
+  data_hora: number;
+  resolvido: boolean;
+  status?: string;
+  ultima_atualizacao?: number;
+}
+
 export default function PoliceRadar() {
   const [authStatus, setAuthStatus] = useState(false);
   const [alertas, setAlertas] = useState<Alerta[]>([]);
