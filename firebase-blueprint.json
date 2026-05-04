@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "Estudante": {
+      "title": "Estudante",
+      "description": "Estudante registrado",
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string" },
+        "matricula": { "type": "string" },
+        "telefone": { "type": "string" },
+        "email": { "type": "string" },
+        "foto_url": { "type": "string" },
+        "instituicao": { "type": "string" }
+      },
+      "required": ["nome", "matricula", "telefone", "email"]
+    },
+    "Policial": {
+      "title": "Policial",
+      "description": "Policial registrado",
+      "type": "object",
+      "properties": {
+        "credencial": { "type": "string" }
+      },
+      "required": ["credencial"]
+    },
+    "EstudanteEmbed": {
+      "title": "Estudante Embedded",
+      "description": "Informações do estudante associadas ao alerta",
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string" },
+        "matricula": { "type": "string" },
+        "telefone": { "type": "string" }
+      },
+      "required": ["nome", "matricula", "telefone"]
+    },
+    "AlertaSOS": {
+      "title": "Alerta SOS",
+      "description": "Registro de emergência de um estudante",
+      "type": "object",
+      "properties": {
+        "estudante_id": { "type": "string" },
+        "estudante": { "$ref": "#/entities/EstudanteEmbed" },
+        "localizacao": { "type": "string" },
+        "data_hora": { "type": "number", "description": "Timestamp em milissegundos" },
+        "resolvido": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["operacao", "resolvido"] },
+        "ultima_atualizacao": { "type": "number" }
+      },
+      "required": ["estudante_id", "estudante", "localizacao", "data_hora", "resolvido"]
+    },
+    "Mensagem": {
+      "title": "Mensagem",
+      "description": "Mensagem de chat no Alerta SOS",
+      "type": "object",
+      "properties": {
+        "texto": { "type": "string" },
+        "remetenteId": { "type": "string" },
+        "remetenteRole": { "type": "string", "enum": ["estudante", "guarda"] },
+        "data_hora": { "type": "number" }
+      },
+      "required": ["texto", "remetenteId", "remetenteRole", "data_hora"]
+    }
+  },
+  "firestore": {
+    "estudantes/{uid}": {
+      "schema": { "$ref": "#/entities/Estudante" },
+      "description": "Coleção de estudantes"
+    },
+    "policiais/{uid}": {
+      "schema": { "$ref": "#/entities/Policial" },
+      "description": "Coleção de policiais"
+    },
+    "alertasos/{alertaId}": {
+      "schema": { "$ref": "#/entities/AlertaSOS" },
+      "description": "Alertas de emergência enviados pelos estudantes"
+    },
+    "alertasos/{alertaId}/mensagens/{mensagemId}": {
+      "schema": { "$ref": "#/entities/Mensagem" },
+      "description": "Mensagens de chat vinculadas a um alerta SOS ativo."
+    }
+  }
+}

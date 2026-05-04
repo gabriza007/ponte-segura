@@ -1,0 +1,8 @@
+{
+  "name": "Ponte Segura",
+  "description": "Sistema de alertas de emergência (SOS) para estudantes e Guarda Municipal com design glassmorphism.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
