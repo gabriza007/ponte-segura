@@ -1,20 +1,19 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Alerta SOS Estudante
 
-# Run and deploy your AI Studio app
+## 🚨 Sistema de alertas de emergência (SOS) para estudantes e Guarda Municipal
 
-This contains everything you need to run your app locally.
+Um sistema completo de alertas em tempo real. Estudantes podem enviar alertas de emergência (SOS) com um clique. A Guarda Municipal recebe a localização exata no radar em tempo real, permitindo uma resposta rápida e eficiente.
 
-View your app in AI Studio: https://ai.studio/apps/bcb5c78e-6a7b-4b24-b158-21c0f855cb28
+![Logo](https://api.dicebear.com/9.x/initials/svg?seed=SOS&backgroundColor=1e293b&textColor=f87171)
 
-## Run Locally
+### Funcionalidades
+- **SOS Imediato**: Alerta instantâneo para a Guarda Municipal com localização GPS precisa.
+- **Rastreamento em Tempo Real**: Radar interativo para a polícia rastrear e monitorar os alertas.
+- **Chat ao Vivo**: Comunicação rápida e direta entre o estudante e a central de operações.
+- **Segurança**: Sistema de login e autenticação.
+- **Interface Intuitiva**: Design moderno "glassmorphism", responsivo e focado em usabilidade para momentos de tensão.
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Tecnologias Utilizadas
+- **Frontend**: React (Vite), TypeScript, Tailwind CSS
+- **Backend / BaaS**: Firebase (Auth, Firestore)
+- **Mapas**: React Leaflet
