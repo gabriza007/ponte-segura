@@ -198,7 +198,7 @@ function StudentApp({ studentData }: { studentData: any }) {
   if (!studentData) return null;
 
   return (
-    <div className="mobile-container fade-in pb-28">
+    <div className="mobile-container fade-in pb-8">
       {/* Modal de Confirmação de Saída */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 fade-in px-4">
@@ -308,7 +308,7 @@ function StudentApp({ studentData }: { studentData: any }) {
         <>
           {step === 2 && (
             <div className="fade-in" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', padding: '2rem 1rem' }}>
-               <div className="header mt-8">
+               <div className="header mt-12">
                 <h1 className="outfit-font text-danger"><AlertTriangle size={32} /> Emergência</h1>
                 <p>A central será notificada imediatamente</p>
               </div>
@@ -343,7 +343,7 @@ function StudentApp({ studentData }: { studentData: any }) {
           )}
 
           {step === 3 && (
-            <div className="glass-panel-heavy form-card text-center fade-in mt-12">
+            <div className="glass-panel-heavy form-card text-center fade-in mt-20 mx-4">
               <CheckCircle2 className="success-icon" />
               <h2 className="mt-4 mb-2 outfit-font text-white" style={{ fontSize: '1.8rem' }}>Aviso Enviado!</h2>
               {alertaStatus === 'operacao' && (
@@ -378,7 +378,7 @@ function StudentApp({ studentData }: { studentData: any }) {
       )}
 
       {activeTab === 'profile' && (
-        <div className="fade-in pt-12 px-2">
+        <div className="fade-in pt-20 px-4">
           <div className="header mb-8 text-center">
             <h1 className="outfit-font text-white mx-auto flex items-center justify-center gap-2">
               <User size={32} className="text-primary" /> Meu Perfil
@@ -435,32 +435,6 @@ function StudentApp({ studentData }: { studentData: any }) {
           </div>
         </div>
       )}
-
-      {/* Persistent Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/90 backdrop-blur-md border-t border-white/10 px-6 py-3 pb-8">
-        <div className="flex items-center justify-around max-w-lg mx-auto">
-          <button 
-            onClick={() => setActiveTab('home')}
-            className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'home' ? 'text-primary' : 'text-slate-400 hover:text-white'}`}
-          >
-            <div className="relative">
-              <AlertTriangle size={24} className={activeTab === 'home' ? 'animate-pulse' : ''} />
-              {activeTab !== 'home' && unreadMessages > 0 && step === 3 && (
-                <span className="absolute -top-1 -right-1 bg-danger w-3 h-3 rounded-full border border-slate-900"></span>
-              )}
-            </div>
-            <span className="text-[10px] uppercase font-bold tracking-wider">Alertas</span>
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('profile')}
-            className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'profile' ? 'text-primary' : 'text-slate-400 hover:text-white'}`}
-          >
-            <User size={24} />
-            <span className="text-[10px] uppercase font-bold tracking-wider">Perfil</span>
-          </button>
-        </div>
-      </div>
 
       {/* Chat Side Panel / Modal */}
       {isChatOpen && alertaId && (

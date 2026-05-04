@@ -1,10 +1,10 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); // CRITICAL: Database ID
+export const db = initializeFirestore(app, { experimentalForceLongPolling: true }, firebaseConfig.firestoreDatabaseId); // CRITICAL: Database ID
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut };
