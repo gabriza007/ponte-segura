@@ -9,6 +9,7 @@ import { signOut } from 'firebase/auth';
 import { MapUpdater } from '../../components/MapUpdater';
 import Logo from '../../components/Logo';
 import ChatInterface from '../../components/ChatInterface';
+import { Alerta } from '../../types';
 
 const emergencyIcon = L.divIcon({
   className: 'custom-div-icon',
@@ -36,7 +37,7 @@ const defaultIcon = L.divIcon({
 
 export default function PoliceRadar() {
   const [authStatus, setAuthStatus] = useState(false);
-  const [alertas, setAlertas] = useState<any[]>([]);
+  const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [loadingRadar, setLoadingRadar] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
