@@ -8,7 +8,16 @@ import { getAddressFromCoords } from '../../utils/geocoding';
 import Logo from '../../components/Logo';
 import ChatInterface from '../../components/ChatInterface';
 
-function StudentApp({ studentData }: { studentData: any }) {
+export interface StudentData {
+  id: string;
+  nome: string;
+  matricula: string;
+  telefone: string;
+  instituicao?: string;
+  foto_url?: string;
+}
+
+function StudentApp({ studentData }: { studentData: StudentData }) {
   const [activeTab, setActiveTab] = useState<'home' | 'profile'>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [step, setStep] = useState(2);
@@ -462,12 +471,12 @@ function StudentApp({ studentData }: { studentData: any }) {
 }
 
 export default function StudentAppWrapper() {
-  const [studentData, setStudentData] = useState<any>(null);
+  const [studentData, setStudentData] = useState<StudentData | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const locState = location.state as any;
+    const locState = location.state as { student?: StudentData } | null;
     if (locState?.student) {
       setStudentData(locState.student);
     } else {
@@ -476,7 +485,7 @@ export default function StudentAppWrapper() {
           try {
             const userDoc = await getDocFromServer(doc(db, 'estudantes', user.uid));
             if (userDoc.exists()) {
-              setStudentData({ ...userDoc.data(), id: user.uid });
+              setStudentData({ ...userDoc.data(), id: user.uid } as StudentData);
             } else {
               navigate('/');
             }
