@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Alerta } from '../types';
 
-export const MapUpdater = ({ alertas, selectedAlertaId }: { alertas: Alerta[], selectedAlertaId?: string | null }) => {
+export const MapUpdater = ({ alertas, selectedAlertaId }: { alertas: any[], selectedAlertaId?: string | null }) => {
   const map = useMap();
   useEffect(() => {
     if (selectedAlertaId) {

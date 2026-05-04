@@ -8,16 +8,7 @@ import { getAddressFromCoords } from '../../utils/geocoding';
 import Logo from '../../components/Logo';
 import ChatInterface from '../../components/ChatInterface';
 
-export interface StudentData {
-  id: string;
-  nome: string;
-  matricula: string;
-  telefone: string;
-  instituicao?: string;
-  foto_url?: string;
-}
-
-function StudentApp({ studentData }: { studentData: StudentData }) {
+function StudentApp({ studentData }: { studentData: any }) {
   const [activeTab, setActiveTab] = useState<'home' | 'profile'>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [step, setStep] = useState(2);
@@ -96,22 +87,14 @@ function StudentApp({ studentData }: { studentData: StudentData }) {
     e.preventDefault();
     setUpdatingProfile(true);
     setProfileMsg('');
-
-    const trimmedUrl = fotoUrl.trim();
-    if (trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
-      setProfileMsg('A URL da foto deve começar com http:// ou https://');
-      setUpdatingProfile(false);
-      return;
-    }
-
     try {
       await updateDoc(doc(db, 'estudantes', studentData.id), {
         instituicao,
-        foto_url: trimmedUrl
+        foto_url: fotoUrl
       });
       setProfileMsg('Perfil atualizado com sucesso!');
       studentData.instituicao = instituicao;
-      studentData.foto_url = trimmedUrl;
+      studentData.foto_url = fotoUrl;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `estudantes/${studentData.id}`);
       setProfileMsg('Erro ao atualizar. Verifique as permissões.');
@@ -471,12 +454,12 @@ function StudentApp({ studentData }: { studentData: StudentData }) {
 }
 
 export default function StudentAppWrapper() {
-  const [studentData, setStudentData] = useState<StudentData | null>(null);
+  const [studentData, setStudentData] = useState<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const locState = location.state as { student?: StudentData } | null;
+    const locState = location.state as any;
     if (locState?.student) {
       setStudentData(locState.student);
     } else {
@@ -485,7 +468,7 @@ export default function StudentAppWrapper() {
           try {
             const userDoc = await getDocFromServer(doc(db, 'estudantes', user.uid));
             if (userDoc.exists()) {
-              setStudentData({ ...userDoc.data(), id: user.uid } as StudentData);
+              setStudentData({ ...userDoc.data(), id: user.uid });
             } else {
               navigate('/');
             }
