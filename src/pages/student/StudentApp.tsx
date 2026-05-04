@@ -87,14 +87,22 @@ function StudentApp({ studentData }: { studentData: any }) {
     e.preventDefault();
     setUpdatingProfile(true);
     setProfileMsg('');
+
+    const trimmedUrl = fotoUrl.trim();
+    if (trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
+      setProfileMsg('A URL da foto deve começar com http:// ou https://');
+      setUpdatingProfile(false);
+      return;
+    }
+
     try {
       await updateDoc(doc(db, 'estudantes', studentData.id), {
         instituicao,
-        foto_url: fotoUrl
+        foto_url: trimmedUrl
       });
       setProfileMsg('Perfil atualizado com sucesso!');
       studentData.instituicao = instituicao;
-      studentData.foto_url = fotoUrl;
+      studentData.foto_url = trimmedUrl;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `estudantes/${studentData.id}`);
       setProfileMsg('Erro ao atualizar. Verifique as permissões.');
