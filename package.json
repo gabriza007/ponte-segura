@@ -4,14 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node generate-config.cjs",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "start": "vite --port=3000 --host=0.0.0.0",
-    "prebuild": "node generate-config.cjs",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "prelint": "node generate-config.cjs",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

@@ -1,7 +1,32 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, initializeFirestore } from 'firebase/firestore';
-import firebaseConfig from '../firebase-applet-config.json';
+
+// Default to env vars if available (useful for deployed environments like Vercel)
+const configFromEnv = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID,
+};
+
+let firebaseConfig: any = configFromEnv;
+
+// Fallback to dummy config so app at least builds in CI without env vars
+if (!firebaseConfig.apiKey) {
+  firebaseConfig = {
+    apiKey: 'dummy-api-key',
+    authDomain: 'dummy-auth-domain.firebaseapp.com',
+    projectId: 'dummy-project-id',
+    storageBucket: 'dummy-project-id.appspot.com',
+    messagingSenderId: '123456789',
+    appId: '1:123456789:web:abcdef123456',
+    firestoreDatabaseId: 'dummy-database-id'
+  };
+}
 
 console.log("Firebase config loaded:");
 console.log("Project ID:", firebaseConfig.projectId);
