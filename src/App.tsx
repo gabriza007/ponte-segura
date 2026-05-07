@@ -10,6 +10,14 @@ import PoliceLogin from './pages/police/PoliceLogin';
 import PoliceRegister from './pages/police/PoliceRegister';
 import PoliceRadar from './pages/police/PoliceRadar';
 
+import ParentAuth from './pages/parent/ParentAuth';
+import ParentRadar from './pages/parent/ParentRadar';
+
+import InstitutionAuth from './pages/institution/InstitutionAuth';
+import InstitutionRadar from './pages/institution/InstitutionRadar';
+
+import MobileTestButton from './components/MobileTestButton';
+
 // Fix generic leaflet marker icon issue
 import L from 'leaflet';
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -37,10 +45,18 @@ export default function App() {
         <Route path="/" element={<StudentLogin />} />
         <Route path="/register" element={<StudentRegister />} />
         <Route path="/app" element={<StudentAppWrapper />} />
+        
         <Route path="/painel/login" element={<PoliceLogin />} />
         <Route path="/painel/register" element={<PoliceRegister />} />
         <Route path="/painel/radar" element={<PoliceRadar />} />
+        
+        <Route path="/pais" element={<ParentAuth />} />
+        <Route path="/pais/radar" element={<ParentRadar />} />
+        
+        <Route path="/instituicao" element={<InstitutionAuth />} />
+        <Route path="/instituicao/radar" element={<InstitutionRadar />} />
       </Routes>
+      <MobileTestButton />
     </BrowserRouter>
   );
 }

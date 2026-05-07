@@ -2,9 +2,16 @@ import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-export const MapUpdater = ({ alertas, selectedAlertaId }: { alertas: any[], selectedAlertaId?: string | null }) => {
+export const MapUpdater = ({ alertas, selectedAlertaId, center }: { alertas?: any[], selectedAlertaId?: string | null, center?: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom(), { animate: true });
+      return;
+    }
+
+    if (!alertas) return;
+
     if (selectedAlertaId) {
       const selected = alertas.find(a => a.id === selectedAlertaId);
       if (selected && selected.coordenadas) {
@@ -22,6 +29,6 @@ export const MapUpdater = ({ alertas, selectedAlertaId }: { alertas: any[], sele
          map.fitBounds(bounds, { padding: [50, 50] });
       }
     }
-  }, [alertas, map, selectedAlertaId]);
+  }, [alertas, map, selectedAlertaId, center]);
   return null;
 };

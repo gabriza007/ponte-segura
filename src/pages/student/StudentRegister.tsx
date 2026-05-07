@@ -28,7 +28,8 @@ export default function StudentRegister() {
           telefone: student.telefone,
           email: student.email,
           instituicao: '',
-          foto_url: ''
+          foto_url: '',
+          emailVerificado: false
         });
       } catch (fbErr) {
         handleFirestoreError(fbErr, OperationType.CREATE, `estudantes/${uid}`);

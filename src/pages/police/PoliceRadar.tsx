@@ -399,7 +399,7 @@ export default function PoliceRadar() {
         {filteredAlertas.map(alerta => (
           <div 
             key={alerta.id} 
-            className={`glass-panel alert-card cursor-pointer transition-colors ${selectedAlertaId === alerta.id ? 'border-primary' : ''}`}
+            className={`glass-card alert-card cursor-pointer transition-colors ${selectedAlertaId === alerta.id ? 'border-primary' : ''}`}
             onClick={() => setSelectedAlertaId(alerta.id)}
           >
             <div className="card-header">

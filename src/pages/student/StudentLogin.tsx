@@ -19,10 +19,10 @@ export default function StudentLogin() {
     try {
       const res = await signInWithEmailAndPassword(auth, credentials.email, credentials.senha);
       
-//      if (!res.user.emailVerified) {
-//        await signOut(auth);
-//        throw new Error('UNVERIFIED_EMAIL');
-//      }
+      if (!res.user.emailVerified) {
+        await signOut(auth);
+        throw new Error('UNVERIFIED_EMAIL');
+      }
 
       const userDoc = await getDoc(doc(db, 'estudantes', res.user.uid));
       if (!userDoc.exists()) throw new Error('ESTUDANTE_NAO_ENCONTRADO');
@@ -73,9 +73,20 @@ export default function StudentLogin() {
             
             <div className="flex flex-col items-center gap-4 mt-6 pt-6 border-t border-white/10">
               <Link to="/register" className="text-primary hover:text-white transition-colors text-sm font-medium" style={{ textDecoration: 'none' }}>Não tem conta? Cadastre-se</Link>
-              <Link to="/painel/login" className="text-muted hover:text-white transition-colors text-xs flex items-center gap-1" style={{ textDecoration: 'none' }}><Shield size={12}/> Acesso Guarda Municipal</Link>
             </div>
           </form>
+        </div>
+        
+        <div className="mt-8 flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
+          <Link to="/pais" className="text-sm font-bold opacity-70 hover:opacity-100 flex items-center justify-between w-full p-3 rounded-lg border border-white/10 bg-black/20 hover:bg-black/40">
+             <span>Portal dos Pais</span> <Shield size={16}/>
+          </Link>
+          <Link to="/instituicao" className="text-sm font-bold opacity-70 hover:opacity-100 flex items-center justify-between w-full p-3 rounded-lg border border-white/10 bg-black/20 hover:bg-black/40">
+             <span>Portal da Instituição</span> <Shield size={16}/>
+          </Link>
+          <Link to="/painel/login" className="text-sm font-bold opacity-70 hover:opacity-100 flex items-center justify-between w-full p-3 rounded-lg border border-white/10 bg-black/20 hover:bg-black/40">
+             <span>Acesso Operacional (Base)</span> <Shield size={16}/>
+          </Link>
         </div>
       </div>
     </div>

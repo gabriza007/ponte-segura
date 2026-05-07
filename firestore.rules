@@ -55,11 +55,43 @@ service cloud.firestore {
                     incoming().telefone is string && incoming().telefone.size() > 0 && incoming().telefone.size() <= 20 &&
                     incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
                     (!('instituicao' in incoming()) || (incoming().instituicao is string && incoming().instituicao.size() <= 150)) &&
-                    (!('foto_url' in incoming()) || (incoming().foto_url is string && incoming().foto_url.size() <= 500));
-      allow read: if isSignedIn() && request.auth.uid == uid;
-      allow update: if isSignedIn() && request.auth.uid == uid && incoming().diff(existing()).affectedKeys().hasOnly(['instituicao', 'foto_url']) &&
+                    (!('foto_url' in incoming()) || (incoming().foto_url is string && incoming().foto_url.size() <= 500)) &&
+                    (!('coordenadas' in incoming()) || (incoming().coordenadas is map && incoming().coordenadas.keys().hasAll(['lat', 'lng']))) &&
+                    (!('ultima_localizacao_tempo' in incoming()) || incoming().ultima_localizacao_tempo is number) &&
+                    (!('emailVerificado' in incoming()) || incoming().emailVerificado is bool);
+      allow read: if isSignedIn() && (
+                    request.auth.uid == uid || 
+                    isGuarda() || 
+                    (exists(/databases/$(database)/documents/pais/$(request.auth.uid)) && get(/databases/$(database)/documents/pais/$(request.auth.uid)).data.filho_matricula == existing().matricula) ||
+                    (exists(/databases/$(database)/documents/instituicoes/$(request.auth.uid)) && get(/databases/$(database)/documents/instituicoes/$(request.auth.uid)).data.instituicao_alvo == existing().instituicao)
+                  );
+      allow update: if isSignedIn() && request.auth.uid == uid && incoming().diff(existing()).affectedKeys().hasOnly(['instituicao', 'foto_url', 'coordenadas', 'ultima_localizacao_tempo']) &&
                     (!('instituicao' in incoming()) || (incoming().instituicao is string && incoming().instituicao.size() <= 150)) &&
-                    (!('foto_url' in incoming()) || (incoming().foto_url is string && incoming().foto_url.size() <= 500));
+                    (!('foto_url' in incoming()) || (incoming().foto_url is string && incoming().foto_url.size() <= 500)) &&
+                    (!('coordenadas' in incoming()) || (incoming().coordenadas is map && incoming().coordenadas.keys().hasAll(['lat', 'lng']))) &&
+                    (!('ultima_localizacao_tempo' in incoming()) || incoming().ultima_localizacao_tempo is number);
+    }
+
+    match /pais/{uid} {
+      allow create: if isSignedIn() && request.auth.uid == uid &&
+                    incoming().keys().hasAll(['nome', 'email', 'filho_matricula']) &&
+                    incoming().nome is string && incoming().nome.size() > 0 && incoming().nome.size() <= 100 &&
+                    incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
+                    incoming().filho_matricula is string && incoming().filho_matricula.size() > 0 && incoming().filho_matricula.size() <= 60 &&
+                    (!('emailVerificado' in incoming()) || incoming().emailVerificado is bool);
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if false;
+    }
+
+    match /instituicoes/{uid} {
+      allow create: if isSignedIn() && request.auth.uid == uid &&
+                    incoming().keys().hasAll(['nome', 'email', 'instituicao_alvo']) &&
+                    incoming().nome is string && incoming().nome.size() > 0 && incoming().nome.size() <= 100 &&
+                    incoming().email is string && incoming().email.size() > 0 && incoming().email.size() <= 150 &&
+                    incoming().instituicao_alvo is string && incoming().instituicao_alvo.size() > 0 && incoming().instituicao_alvo.size() <= 150 &&
+                    (!('emailVerificado' in incoming()) || incoming().emailVerificado is bool);
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if false;
     }
 
     match /policiais/{uid} {

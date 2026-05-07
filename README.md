@@ -1,9 +1,6 @@
-ATIVIDADE ENGENHARIA DE SOFTWARE ETE PORTO DIGITAL
-
-
 # Alerta SOS Estudante
 
-## Sistema de alertas de emergência (SOS) para estudantes e Guarda Municipal
+## 🚨 Sistema de alertas de emergência (SOS) para estudantes e Guarda Municipal
 
 Um sistema completo de alertas em tempo real. Estudantes podem enviar alertas de emergência (SOS) com um clique. A Guarda Municipal recebe a localização exata no radar em tempo real, permitindo uma resposta rápida e eficiente.
 

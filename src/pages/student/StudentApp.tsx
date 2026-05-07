@@ -114,7 +114,7 @@ function StudentApp({ studentData }: { studentData: any }) {
     let unsubscribeChat: (() => void) | undefined;
     let lastFetchTime = 0; // Throttle to avoid rate limits
 
-    if (step === 3 && alertaId && "geolocation" in navigator) {
+    if (step === 3 && alertaId) {
       // Listen to alert status
       unsubscribeAlert = onSnapshot(doc(db, 'alertasos', alertaId), (docSnap) => {
         if (docSnap.exists()) {
@@ -142,11 +142,11 @@ function StudentApp({ studentData }: { studentData: any }) {
           }
         }
       );
+    }
 
+    if ("geolocation" in navigator) {
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
-          if (statusRef.current === 'resolvido') return;
-
           const now = Date.now();
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
@@ -163,23 +163,36 @@ function StudentApp({ studentData }: { studentData: any }) {
 
           setLocation(newLoc);
           setCoords({ lat, lng });
+
+          // Update student location continuously for tracking
+          try {
+            await updateDoc(doc(db, 'estudantes', studentData.id), {
+               coordenadas: { lat, lng },
+               ultima_localizacao_tempo: Date.now()
+            });
+          } catch (err) {
+             console.error("Failed to update student tracking:", err);
+          }
           
-          if (statusRef.current === 'operacao' || statusRef.current === '' || statusRef.current === undefined) {
-             try {
-               await updateDoc(doc(db, 'alertasos', alertaId), { 
-                 localizacao: newLoc,
-                 coordenadas: { lat, lng },
-                 ultima_atualizacao: Date.now()
-               });
-             } catch (err) {
-                console.error("Failed to update location:", err);
-             }
+          if (step === 3 && alertaId && statusRef.current !== 'resolvido') {
+            if (statusRef.current === 'operacao' || statusRef.current === '' || statusRef.current === undefined) {
+               try {
+                 await updateDoc(doc(db, 'alertasos', alertaId), { 
+                   localizacao: newLoc,
+                   coordenadas: { lat, lng },
+                   ultima_atualizacao: Date.now()
+                 });
+               } catch (err) {
+                  console.error("Failed to update alert location:", err);
+               }
+            }
           }
         },
         (err) => console.error("Error watching location:", err),
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     }
+
     return () => {
       if (watchId !== undefined && "geolocation" in navigator) {
         navigator.geolocation.clearWatch(watchId);
@@ -187,7 +200,7 @@ function StudentApp({ studentData }: { studentData: any }) {
       if (unsubscribeAlert) unsubscribeAlert();
       if (unsubscribeChat) unsubscribeChat();
     };
-  }, [step, alertaId, isChatOpen]);
+  }, [step, alertaId, isChatOpen, studentData.id, location]);
 
   useEffect(() => {
     if (isChatOpen) {

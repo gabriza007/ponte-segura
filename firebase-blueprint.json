@@ -10,9 +10,39 @@
         "telefone": { "type": "string" },
         "email": { "type": "string" },
         "foto_url": { "type": "string" },
-        "instituicao": { "type": "string" }
+        "instituicao": { "type": "string" },
+        "coordenadas": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "ultima_localizacao_tempo": { "type": "number", "description": "Timestamp" }
       },
       "required": ["nome", "matricula", "telefone", "email"]
+    },
+    "Pai": {
+      "title": "Pai",
+      "description": "Pai registrado",
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string" },
+        "email": { "type": "string" },
+        "filho_matricula": { "type": "string" }
+      },
+      "required": ["nome", "email", "filho_matricula"]
+    },
+    "Instituicao": {
+      "title": "Instituição",
+      "description": "Instituição de ensino registrada",
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string" },
+        "email": { "type": "string" },
+        "instituicao_alvo": { "type": "string" }
+      },
+      "required": ["nome", "email", "instituicao_alvo"]
     },
     "Policial": {
       "title": "Policial",
@@ -66,6 +96,14 @@
     "estudantes/{uid}": {
       "schema": { "$ref": "#/entities/Estudante" },
       "description": "Coleção de estudantes"
+    },
+    "pais/{uid}": {
+      "schema": { "$ref": "#/entities/Pai" },
+      "description": "Coleção de pais e responsáveis"
+    },
+    "instituicoes/{uid}": {
+      "schema": { "$ref": "#/entities/Instituicao" },
+      "description": "Coleção de contas de instituições"
     },
     "policiais/{uid}": {
       "schema": { "$ref": "#/entities/Policial" },
